@@ -1,46 +1,453 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Fashion Box ✨ – Virtual Try-On</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --pink:#FF2D78;--purple:#7C3AED;--cyan:#00D4FF;--orange:#FF6B2B;
+    --yellow:#FFD93D;--green:#00E676;--bg:#07071A;--card:#12123A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:#fff;min-height:100vh;overflow-x:hidden}
 
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
+  /* ── Animated BG ── */
+  .bg-wrap{position:fixed;inset:0;z-index:0;overflow:hidden}
+  .blob{position:absolute;border-radius:50%;filter:blur(80px);animation:blobmove 8s ease-in-out infinite alternate}
+  .b1{width:500px;height:500px;background:rgba(124,58,237,.25);top:-100px;left:-100px;animation-delay:0s}
+  .b2{width:400px;height:400px;background:rgba(255,45,120,.2);top:50%;right:-80px;animation-delay:-3s}
+  .b3{width:350px;height:350px;background:rgba(0,212,255,.15);bottom:-80px;left:30%;animation-delay:-5s}
+  .b4{width:250px;height:250px;background:rgba(255,107,43,.18);top:20%;left:60%;animation-delay:-2s}
+  @keyframes blobmove{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.2) translate(30px,20px)}}
 
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+  /* ── Stars ── */
+  .stars{position:fixed;inset:0;z-index:0}
+  .star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;animation:twinkle 3s ease-in-out infinite}
+  @keyframes twinkle{0%,100%{opacity:.1}50%{opacity:.9}}
 
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="/">
+  /* ── Content ── */
+  .page{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:20px 16px 60px}
 
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  /* ── Header ── */
+  header{text-align:center;padding:40px 0 20px}
+  .logo-wrap{display:inline-flex;align-items:center;gap:14px;background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.1);border-radius:50px;padding:10px 24px;margin-bottom:24px;
+    backdrop-filter:blur(10px)}
+  .logo-emoji{font-size:2rem;animation:bounce 2s ease-in-out infinite}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  .logo-text{font-size:1.4rem;font-weight:900;background:linear-gradient(135deg,var(--pink),var(--purple),var(--cyan));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  h1{font-size:clamp(2rem,6vw,3.8rem);font-weight:900;line-height:1.1;margin-bottom:12px}
+  h1 span{background:linear-gradient(135deg,var(--pink),var(--purple),var(--cyan));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .subtitle{font-size:1.1rem;color:rgba(255,255,255,.55);margin-bottom:28px}
+  .badges{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:32px}
+  .badge{padding:6px 16px;border-radius:30px;font-size:.85rem;font-weight:700;border:1px solid;cursor:default}
+  .badge-pink{color:var(--pink);border-color:rgba(255,45,120,.4);background:rgba(255,45,120,.1)}
+  .badge-cyan{color:var(--cyan);border-color:rgba(0,212,255,.4);background:rgba(0,212,255,.1)}
+  .badge-orange{color:var(--orange);border-color:rgba(255,107,43,.4);background:rgba(255,107,43,.1)}
+  .badge-yellow{color:var(--yellow);border-color:rgba(255,217,61,.4);background:rgba(255,217,61,.1)}
 
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="fashion_box_frontend">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  /* ── Cartoon Fashion Girl (CSS art) ── */
+  .cartoon-wrap{display:flex;justify-content:center;gap:32px;margin:0 0 40px;flex-wrap:wrap}
+  .cartoon-figure{position:relative;width:100px;animation:floatfig 3s ease-in-out infinite}
+  .cartoon-figure:nth-child(2){animation-delay:-1s}
+  .cartoon-figure:nth-child(3){animation-delay:-2s}
+  @keyframes floatfig{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+  .fig-head{width:44px;height:44px;border-radius:50%;margin:0 auto 4px;position:relative}
+  .fig-body{height:52px;border-radius:12px 12px 6px 6px;margin:0 auto;width:42px}
+  .fig-legs{display:flex;gap:6px;justify-content:center;margin-top:3px}
+  .fig-leg{width:14px;height:28px;border-radius:6px}
+  .fig-hair{position:absolute;top:-8px;left:4px;right:4px;height:18px;border-radius:12px 12px 0 0}
+  .fig-eye{position:absolute;width:6px;height:6px;background:#fff;border-radius:50%;top:14px}
+  .fig-eye.l{left:10px}.fig-eye.r{right:10px}
+  .fig-smile{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+    width:14px;height:7px;border:2px solid #fff;border-top:none;border-radius:0 0 8px 8px}
+  /* Figure 1 – Pink dress */
+  .f1 .fig-head{background:#FDBCB4}
+  .f1 .fig-hair{background:var(--pink)}
+  .f1 .fig-body{background:linear-gradient(160deg,var(--pink),#ff8fab);box-shadow:0 0 20px rgba(255,45,120,.5)}
+  .f1 .fig-leg{background:#FDBCB4}
+  /* Figure 2 – Purple outfit */
+  .f2 .fig-head{background:#F5CBA7}
+  .f2 .fig-hair{background:var(--purple)}
+  .f2 .fig-body{background:linear-gradient(160deg,var(--purple),#a855f7);box-shadow:0 0 20px rgba(124,58,237,.5)}
+  .f2 .fig-leg{background:#F5CBA7}
+  /* Figure 3 – Cyan outfit */
+  .f3 .fig-head{background:#FDBCB4}
+  .f3 .fig-hair{background:#1a1a2e}
+  .f3 .fig-body{background:linear-gradient(160deg,var(--cyan),#0ea5e9);box-shadow:0 0 20px rgba(0,212,255,.5)}
+  .f3 .fig-leg{background:#FDBCB4}
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  /* sparkle around figures */
+  .sparkle{position:absolute;font-size:1rem;animation:spin-sparkle 4s linear infinite}
+  @keyframes spin-sparkle{0%{transform:rotate(0deg) translateX(55px) rotate(0deg)}
+    100%{transform:rotate(360deg) translateX(55px) rotate(-360deg)}}
 
-  <title>fashion_box_frontend</title>
-  <link rel="manifest" href="manifest.json">
+  /* ── Step Cards ── */
+  .steps{display:flex;flex-direction:column;gap:20px}
+  .card{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:24px;
+    padding:24px;transition:transform .3s,box-shadow .3s;position:relative;overflow:hidden}
+  .card:hover{transform:translateY(-4px)}
+  .card::before{content:'';position:absolute;inset:0;border-radius:24px;
+    background:linear-gradient(135deg,rgba(255,255,255,.04),transparent);pointer-events:none}
+  .card-pink{box-shadow:0 8px 40px rgba(255,45,120,.15)}
+  .card-pink:hover{box-shadow:0 16px 60px rgba(255,45,120,.25)}
+  .card-purple{box-shadow:0 8px 40px rgba(124,58,237,.15)}
+  .card-purple:hover{box-shadow:0 16px 60px rgba(124,58,237,.25)}
+  .card-cyan{box-shadow:0 8px 40px rgba(0,212,255,.15)}
+  .card-cyan:hover{box-shadow:0 16px 60px rgba(0,212,255,.25)}
+
+  .card-header{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+  .step-num{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-size:1.4rem;font-weight:900;flex-shrink:0}
+  .num-pink{background:linear-gradient(135deg,var(--pink),var(--orange))}
+  .num-purple{background:linear-gradient(135deg,var(--purple),#6d28d9)}
+  .num-cyan{background:linear-gradient(135deg,var(--cyan),#0ea5e9)}
+  .card-title{font-size:1.2rem;font-weight:700}
+  .card-sub{font-size:.85rem;color:rgba(255,255,255,.45);margin-top:2px}
+  .step-emoji{font-size:1.8rem}
+
+  /* ── Upload Zone ── */
+  .upload-zone{border:2px dashed rgba(255,255,255,.15);border-radius:18px;
+    min-height:180px;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:10px;cursor:pointer;transition:.3s;position:relative;overflow:hidden}
+  .upload-zone:hover{border-color:var(--pink);background:rgba(255,45,120,.06)}
+  .upload-zone.has-img{border-style:solid;border-color:var(--green)}
+  .upload-zone img{max-height:300px;max-width:100%;border-radius:14px;object-fit:cover}
+  .upload-icon{font-size:3rem;animation:bounce 2s ease-in-out infinite}
+  .upload-text{font-size:1rem;font-weight:600}
+  .upload-hint{font-size:.8rem;color:rgba(255,255,255,.35)}
+  .upload-badge{position:absolute;top:10px;right:10px;padding:5px 12px;border-radius:20px;
+    font-size:.8rem;font-weight:700;background:var(--green);color:#000}
+  .edit-btn{position:absolute;bottom:10px;right:10px;width:36px;height:36px;border-radius:50%;
+    background:var(--purple);border:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
+
+  /* ── URL Input ── */
+  .url-input{width:100%;padding:14px 18px;border-radius:14px;border:2px solid rgba(255,255,255,.1);
+    background:rgba(255,255,255,.06);color:#fff;font-size:1rem;font-family:'Outfit',sans-serif;
+    transition:.3s;outline:none}
+  .url-input:focus{border-color:var(--pink);background:rgba(255,45,120,.06)}
+  .url-input::placeholder{color:rgba(255,255,255,.3)}
+
+  /* ── CTA Button ── */
+  .cta-btn{width:100%;padding:18px;border:none;border-radius:16px;cursor:pointer;
+    background:linear-gradient(135deg,var(--pink),var(--purple),#4f46e5);
+    color:#fff;font-family:'Outfit',sans-serif;font-size:1.15rem;font-weight:900;
+    letter-spacing:.5px;transition:.3s;position:relative;overflow:hidden;margin-top:14px}
+  .cta-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);
+    opacity:0;transition:.3s}
+  .cta-btn:hover::after{opacity:1}
+  .cta-btn:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(124,58,237,.5)}
+  .cta-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+  /* ── Results ── */
+  .result-placeholder{min-height:200px;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:12px;color:rgba(255,255,255,.3)}
+  .result-placeholder .big{font-size:4rem;animation:bounce 2s ease-in-out infinite}
+  .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:600px){.result-grid{grid-template-columns:1fr}}
+  .result-img-wrap{border-radius:16px;overflow:hidden;background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08)}
+  .result-img-wrap img{width:100%;display:block}
+  .result-label{font-size:.8rem;color:rgba(255,255,255,.4);padding:8px 12px;font-weight:600}
+  .result-actions{display:flex;gap:12px;margin-top:16px}
+  .action-btn{flex:1;padding:12px;border-radius:12px;border:1px solid;font-family:'Outfit',sans-serif;
+    font-size:.9rem;font-weight:700;cursor:pointer;transition:.2s;background:transparent}
+  .action-btn:hover{transform:translateY(-2px)}
+  .btn-purple{color:var(--purple);border-color:rgba(124,58,237,.4);background:rgba(124,58,237,.1)}
+  .btn-pink{color:var(--pink);border-color:rgba(255,45,120,.4);background:rgba(255,45,120,.1)}
+
+  /* ── Loader ── */
+  .loader{display:flex;align-items:center;justify-content:center;gap:10px;padding:20px}
+  .dot{width:10px;height:10px;border-radius:50%;animation:dotbounce 1.2s ease-in-out infinite}
+  .dot:nth-child(1){background:var(--pink);animation-delay:0s}
+  .dot:nth-child(2){background:var(--purple);animation-delay:.2s}
+  .dot:nth-child(3){background:var(--cyan);animation-delay:.4s}
+  @keyframes dotbounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+
+  /* ── Toast ── */
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);
+    padding:12px 24px;border-radius:16px;font-weight:700;font-size:.95rem;z-index:9999;
+    transition:transform .4s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .toast-green{background:var(--green);color:#000}
+  .toast-pink{background:var(--pink);color:#fff}
+  .toast-orange{background:var(--orange);color:#fff}
+
+  /* ── Floating emojis ── */
+  .floaters{position:fixed;inset:0;pointer-events:none;z-index:0}
+  .floater{position:absolute;font-size:1.5rem;animation:float-up linear infinite;opacity:0}
+  @keyframes float-up{0%{transform:translateY(100vh) rotate(0deg);opacity:.6}
+    100%{transform:translateY(-20vh) rotate(360deg);opacity:0}}
+
+  /* ── Footer ── */
+  footer{text-align:center;padding:24px;color:rgba(255,255,255,.25);font-size:.85rem}
+  footer span{color:var(--pink)}
+
+  /* ── Snackbar status ── */
+  .status-row{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:.85rem;color:rgba(255,255,255,.5)}
+  .dot-green{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;
+    box-shadow:0 0 8px var(--green);animation:pulse-dot 1.5s ease-in-out infinite}
+  @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
+
+  input[type=file]{display:none}
+</style>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
 
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
-  <script src="flutter_bootstrap.js" async></script>
+<!-- Backgrounds -->
+<div class="bg-wrap">
+  <div class="blob b1"></div><div class="blob b2"></div>
+  <div class="blob b3"></div><div class="blob b4"></div>
+</div>
+<div class="stars" id="stars"></div>
+<div class="floaters" id="floaters"></div>
+
+<div class="page">
+
+  <!-- Header -->
+  <header>
+    <div class="logo-wrap">
+      <span class="logo-emoji">👗</span>
+      <span class="logo-text">Fashion Box</span>
+    </div>
+    <h1>Try On <span>Any Outfit</span><br>Instantly! 🚀</h1>
+    <p class="subtitle">Upload your photo · Paste a product link · See yourself in it!</p>
+    <div class="badges">
+      <span class="badge badge-pink">🛍️ Amazon</span>
+      <span class="badge badge-cyan">👚 Myntra</span>
+      <span class="badge badge-orange">🛒 Flipkart</span>
+      <span class="badge badge-yellow">✨ AI Powered</span>
+    </div>
+  </header>
+
+  <!-- Cartoon Figures -->
+  <div class="cartoon-wrap">
+    <div class="cartoon-figure f1" style="position:relative">
+      <div class="sparkle" style="animation-delay:0s">✨</div>
+      <div class="fig-head"><div class="fig-hair"></div><div class="fig-eye l"></div><div class="fig-eye r"></div><div class="fig-smile"></div></div>
+      <div class="fig-body"></div>
+      <div class="fig-legs"><div class="fig-leg"></div><div class="fig-leg"></div></div>
+    </div>
+    <div class="cartoon-figure f2" style="position:relative">
+      <div class="sparkle" style="animation-delay:-.5s">💫</div>
+      <div class="fig-head"><div class="fig-hair"></div><div class="fig-eye l"></div><div class="fig-eye r"></div><div class="fig-smile"></div></div>
+      <div class="fig-body"></div>
+      <div class="fig-legs"><div class="fig-leg"></div><div class="fig-leg"></div></div>
+    </div>
+    <div class="cartoon-figure f3" style="position:relative">
+      <div class="sparkle" style="animation-delay:-1s">⭐</div>
+      <div class="fig-head"><div class="fig-hair"></div><div class="fig-eye l"></div><div class="fig-eye r"></div><div class="fig-smile"></div></div>
+      <div class="fig-body"></div>
+      <div class="fig-legs"><div class="fig-leg"></div><div class="fig-leg"></div></div>
+    </div>
+  </div>
+
+  <!-- Steps -->
+  <div class="steps">
+
+    <!-- Step 1: Upload Photo -->
+    <div class="card card-pink">
+      <div class="card-header">
+        <div class="step-num num-pink">1</div>
+        <span class="step-emoji">📸</span>
+        <div>
+          <div class="card-title">Upload Your Photo</div>
+          <div class="card-sub">Full-body photo works best for accurate try-on</div>
+        </div>
+      </div>
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+        <span class="upload-icon">🤳</span>
+        <span class="upload-text">Tap to upload your photo</span>
+        <span class="upload-hint">PNG or JPG · Max 10 MB</span>
+      </div>
+      <input type="file" id="fileInput" accept="image/*" onchange="handleFile(this)"/>
+      <div class="status-row" id="uploadStatus" style="display:none">
+        <div class="dot-green"></div><span id="uploadStatusText">Uploading…</span>
+      </div>
+    </div>
+
+    <!-- Step 2: Product Link -->
+    <div class="card card-purple">
+      <div class="card-header">
+        <div class="step-num num-purple">2</div>
+        <span class="step-emoji">🔗</span>
+        <div>
+          <div class="card-title">Paste Product Link</div>
+          <div class="card-sub">From Amazon, Myntra, Flipkart or any fashion store</div>
+        </div>
+      </div>
+      <input class="url-input" id="productUrl" type="url"
+        placeholder="https://www.amazon.in/dp/... or myntra.com/..."/>
+      <button class="cta-btn" id="tryOnBtn" onclick="runTryOn()">
+        ✨ See Results &nbsp; 🚀
+      </button>
+    </div>
+
+    <!-- Step 3: Results -->
+    <div class="card card-cyan">
+      <div class="card-header">
+        <div class="step-num num-cyan">3</div>
+        <span class="step-emoji">🌟</span>
+        <div>
+          <div class="card-title">Your Virtual Look!</div>
+          <div class="card-sub">AI-powered outfit preview on your photo</div>
+        </div>
+      </div>
+      <div id="resultsArea">
+        <div class="result-placeholder">
+          <div class="big">🎭</div>
+          <div>Your virtual outfit will appear here</div>
+          <div style="font-size:.85rem">Complete steps 1 & 2 above ⬆️</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>Made with <span>♥</span> by Fashion Box · AI Virtual Try-On</footer>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const BACKEND = 'https://fashionbox-1.onrender.com';
+let serverFilePath = null;
+
+// ── Stars ──
+const starsEl = document.getElementById('stars');
+for(let i=0;i<120;i++){
+  const s=document.createElement('div');
+  s.className='star';
+  s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;
+    animation-delay:${Math.random()*4}s;animation-duration:${2+Math.random()*3}s;
+    width:${Math.random()>0.8?3:2}px;height:${Math.random()>0.8?3:2}px`;
+  starsEl.appendChild(s);
+}
+
+// ── Floating emojis ──
+const FLOATERS=['👗','👠','👒','💄','👜','🌸','✨','💎','🎀','👑','💫','🌟'];
+const floatersEl=document.getElementById('floaters');
+FLOATERS.forEach((e,i)=>{
+  const f=document.createElement('div');
+  f.className='floater';
+  f.textContent=e;
+  f.style.cssText=`left:${Math.random()*100}%;animation-duration:${8+Math.random()*10}s;
+    animation-delay:${i*1.2}s;font-size:${1+Math.random()}rem`;
+  floatersEl.appendChild(f);
+});
+
+// ── Toast ──
+function toast(msg,type='green'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className=`toast toast-${type} show`;
+  setTimeout(()=>t.className='toast',3000);
+}
+
+// ── Handle file upload ──
+async function handleFile(input){
+  const file=input.files[0];
+  if(!file)return;
+  // Show preview
+  const zone=document.getElementById('uploadZone');
+  zone.innerHTML=`<img src="${URL.createObjectURL(file)}" alt="preview"/>
+    <span class="upload-badge">✅ Ready</span>
+    <button class="edit-btn" onclick="document.getElementById('fileInput').click()">✏️</button>`;
+  zone.classList.add('has-img');
+  // Upload
+  const status=document.getElementById('uploadStatus');
+  const statusText=document.getElementById('uploadStatusText');
+  status.style.display='flex';
+  statusText.textContent='Uploading to server…';
+  try{
+    const fd=new FormData();fd.append('file',file);
+    const r=await fetch(`${BACKEND}/upload-profile`,{method:'POST',body:fd});
+    if(r.ok){
+      const d=await r.json();
+      serverFilePath=d.file_path;
+      statusText.textContent='✅ Photo uploaded & ready!';
+      toast('📸 Photo uploaded successfully!','green');
+    } else { throw new Error(await r.text()); }
+  } catch(e){
+    statusText.textContent='⚠️ Saved locally (backend offline)';
+    // Fallback – store as data URL for demo
+    serverFilePath='__local__';
+    toast('⚠️ Running in demo mode','orange');
+  }
+}
+
+// ── Try-On ──
+async function runTryOn(){
+  const url=document.getElementById('productUrl').value.trim();
+  if(!serverFilePath){toast('📸 Upload your photo first!','pink');return;}
+  if(!url){toast('🔗 Paste a product link!','pink');return;}
+
+  const btn=document.getElementById('tryOnBtn');
+  btn.disabled=true;
+  btn.innerHTML=`<span style="display:flex;align-items:center;justify-content:center;gap:10px">
+    <span>🪄 Generating your look…</span>
+    <span class="loader"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+  </span>`;
+
+  const area=document.getElementById('resultsArea');
+  area.innerHTML=`<div class="loader" style="min-height:160px">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+
+  try{
+    const r=await fetch(`${BACKEND}/try-on`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({product_url:url,user_image_path:serverFilePath})
+    });
+    if(r.ok){
+      const d=await r.json();
+      showResults(d.scraped_clothing_url,d.composite_image_url);
+      toast('🎉 Your virtual look is ready!','green');
+    } else { throw new Error('Server error'); }
+  } catch(e){
+    // Demo fallback
+    showResults(
+      'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&auto=format&fit=crop'
+    );
+    toast('✨ Demo mode – showing sample look!','orange');
+  }
+  btn.disabled=false;
+  btn.innerHTML='✨ See Results &nbsp; 🚀';
+}
+
+function showResults(clothingUrl, compositeUrl){
+  document.getElementById('resultsArea').innerHTML=`
+    <div class="result-grid">
+      <div class="result-img-wrap">
+        <div class="result-label">👚 Extracted Outfit</div>
+        <img src="${clothingUrl}" onerror="this.src='https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&auto=format'"/>
+      </div>
+      <div class="result-img-wrap">
+        <div class="result-label">🌟 Your Virtual Look</div>
+        <img src="${compositeUrl}" onerror="this.src='https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&auto=format'"/>
+      </div>
+    </div>
+    <div class="result-actions">
+      <button class="action-btn btn-purple" onclick="window.open('${compositeUrl}','_blank')">💾 Save Look</button>
+      <button class="action-btn btn-pink" onclick="resetResults()">🔄 Try Another</button>
+    </div>`;
+}
+
+function resetResults(){
+  document.getElementById('resultsArea').innerHTML=`
+    <div class="result-placeholder">
+      <div class="big">🎭</div>
+      <div>Your virtual outfit will appear here</div>
+      <div style="font-size:.85rem">Complete steps 1 & 2 above ⬆️</div>
+    </div>`;
+  document.getElementById('productUrl').value='';
+}
+</script>
 </body>
 </html>
